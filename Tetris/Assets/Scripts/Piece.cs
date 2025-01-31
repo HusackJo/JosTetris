@@ -5,6 +5,7 @@ using UnityEngine;
 public class Piece : MonoBehaviour
 {
     public Board board { get; private set; }
+    public TetrisManager tetrisManager { get; private set; }
     public TetrominoData data { get; private set; }
     public Vector3Int position { get; private set; }
     public Vector3Int[] cells { get; private set; }
@@ -25,6 +26,7 @@ public class Piece : MonoBehaviour
         this.rotationIndex = 0;
         this.stepTime = Time.time + this.stepDelay;
         this.lockTime = 0f;
+        tetrisManager = board.tetrisManager;
 
         if (this.cells == null)
         {
@@ -39,12 +41,14 @@ public class Piece : MonoBehaviour
 
     private void Update()
     {
+
         this.board.ClearPiece(this);
 
         this.lockTime += Time.deltaTime;
-        HandleInputs();
+        HandlePieceInputs();
 
-        if (Time.time >= this.stepTime){
+        if (Time.time >= this.stepTime)
+        {
             Step();
         }
 
@@ -63,14 +67,14 @@ public class Piece : MonoBehaviour
         }
     }
 
-    private void Lock()
+    public void Lock()
     {
         this.board.SetPiece(this);
         this.board.ClearLines();
         this.board.SpawnPiece();
     }
 
-    private void HandleInputs()
+    private void HandlePieceInputs()
     {
         if (Input.GetKeyDown(KeyCode.A))
         {
@@ -121,6 +125,7 @@ public class Piece : MonoBehaviour
         {
             continue;
         }
+        Lock();
     }
 
     private void Rotate(int direction)
@@ -200,5 +205,10 @@ public class Piece : MonoBehaviour
         {
             return min + (input - min) % (max - min);
         }
+    }
+
+    public Vector3Int[] GetCells()
+    {
+        return this.cells;
     }
 }

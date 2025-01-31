@@ -5,13 +5,26 @@ using UnityEngine.Tilemaps;
 
 public class Board : MonoBehaviour
 {
+    public enum GameState
+    {
+        Start,
+        Playing,
+        FixedSequencePlaying,
+        Game_Over,
+    }
+
     public Tilemap tileMap { get; private set; }
     public Piece activePiece { get; private set; }
+    public GameState gameState { get; private set; }
     public TetrominoData[] tetrominos;
+    public TetrominoData[] specialTetrominoSequence;
+    public int tetrominosPlaced;
 
     public Vector3Int spawnPos;
 
     public Vector2Int boardSize;
+
+    public TetrisManager tetrisManager;
 
     public RectInt Bounds
     {
@@ -24,6 +37,7 @@ public class Board : MonoBehaviour
 
     private void Awake()
     {
+        gameState = GameState.Start;
         tileMap = GetComponentInChildren<Tilemap>();
         this.activePiece = GetComponentInChildren<Piece>();
         for (int i = 0; i < this.tetrominos.Length; i++)
@@ -39,12 +53,25 @@ public class Board : MonoBehaviour
 
     public void SpawnPiece()
     {
-        int random = UnityEngine.Random.Range(0,tetrominos.Length);
-        TetrominoData data = tetrominos[random];
+        TetrominoData data = tetrominos[0];
+        if (this.gameState == GameState.FixedSequencePlaying)
+        {
+            print($"Fixed Sequence - piece No: {tetrominosPlaced}");
+            if (tetrominosPlaced < specialTetrominoSequence.Length)
+            {
+                data = specialTetrominoSequence[tetrominosPlaced];
+                print($"assigning piece: {data.tetromino}");
+            }
+        }
+        else
+        {
+            data = GetRandomTetromino();
+        }
         data.Initialize();
 
-        //print($"Spawning piece: {data.tetromino} It's cells are: {data.cells.ToCommaSeparatedString()}");
+        //Debug.Log($"Spawning piece: {data.tetromino} It's cells are: {data.cells.ToCommaSeparatedString()}");
 
+        tetrominosPlaced++;
         this.activePiece.Initialize(this, spawnPos, data);
         if (IsValidPosition(this.activePiece, spawnPos))
         {
@@ -52,20 +79,25 @@ public class Board : MonoBehaviour
         }
         else
         {
-            //GM.GameOver
+            tetrisManager.GameOver();
         }
+    }
+
+    private TetrominoData GetRandomTetromino()
+    {
+        int random = UnityEngine.Random.Range(0, tetrominos.Length);
+        return tetrominos[random];
     }
 
     public void SetPiece(Piece piece)
     {
-        //print(piece.cells.Length);
-        for (int i = 0; i < piece.cells.Length; i++)
+        if (gameState == GameState.Playing || gameState == GameState.FixedSequencePlaying)
         {
-            Vector3Int tilePosition = piece.cells[i] + piece.position;
-
-            //print("tile spawned at: " + piece.cells[i].ToString());
-
-            this.tileMap.SetTile(tilePosition, piece.data.tile);
+            for (int i = 0; i < piece.cells.Length; i++)
+            {
+                Vector3Int tilePosition = piece.cells[i] + piece.position;
+                this.tileMap.SetTile(tilePosition, piece.data.tile);
+            }
         }
     }
 
@@ -148,5 +180,26 @@ public class Board : MonoBehaviour
             }
         }
         return true;
+    }
+
+    public void ClearAllLines()
+    {
+        this.tileMap.ClearAllTiles();
+    }
+
+    public void StartSpawning()
+    {
+        gameState = GameState.Playing;
+    }
+    public void StartSpawningSpecialSequence()
+    {
+        ClearPiece(activePiece);
+        gameState = GameState.FixedSequencePlaying;
+        tetrominosPlaced = 0;
+        SpawnPiece();
+    }
+    public void StopSpawning()
+    {
+        gameState = GameState.Game_Over;
     }
 }

@@ -291,7 +291,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1510062586}
         m_TargetAssemblyTypeName: TetrisManager, Assembly-CSharp
-        m_MethodName: StartGame
+        m_MethodName: StartSpecialBoard
         m_Mode: 1
         m_Arguments:
           m_ObjectArgument: {fileID: 0}
@@ -2889,8 +2889,8 @@ MonoBehaviour:
     tile: {fileID: 11400000, guid: 85061064e72eae948aa1d5bf4ea36ea9, type: 2}
   - tetromino: 0
     tile: {fileID: 11400000, guid: dbdd333e714aa9243b47c3343d0fe436, type: 2}
-  - tetromino: 0
-    tile: {fileID: 11400000, guid: dbdd333e714aa9243b47c3343d0fe436, type: 2}
+  - tetromino: 2
+    tile: {fileID: 11400000, guid: 5a43c2287065f354a9126651a7d56ae0, type: 2}
   tetrominosPlaced: 0
   spawnPos: {x: -1, y: 8, z: 0}
   boardSize: {x: 10, y: 20}
